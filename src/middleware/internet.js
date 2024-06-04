@@ -77,6 +77,7 @@ module.exports = {
   checkInternetConnection,
   scanForWiFiNetworks,
   readWPAConfig,
+  getIpAddress,
   startInternetCheck,
   resumeInternetCheck,
 };

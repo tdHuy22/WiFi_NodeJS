@@ -3,14 +3,11 @@ const { exec } = require("child_process");
 const {
   startInternetCheck,
   turnOnAccessPoint,
-} = require("./src/middleware/internet");
-const path = require("path");
-const bodyParser = require("body-parser");
-const {
-  continuousInternetCheck,
   checkInternetConnection,
   getIpAddress,
 } = require("./src/middleware/internet");
+const path = require("path");
+const bodyParser = require("body-parser");
 const router = require("./src/route/route");
 
 const app = express();
