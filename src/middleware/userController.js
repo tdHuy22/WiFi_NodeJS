@@ -1,11 +1,13 @@
 const { exec, execSync } = require("child_process");
-const { checkInternetConnection, scanForWiFiNetworks } = require("./internet");
-
-let WiFi_List = [];
-let WPA_List = [];
+const {
+  checkInternetConnection,
+  scanForWiFiNetworks,
+  readWPAConfig,
+  resumeInternetCheck,
+} = require("./internet");
 
 function userIndex(req, res) {
-  WiFi_List = scanForWiFiNetworks();
+  const WiFi_List = scanForWiFiNetworks();
   res.render("index", { WiFi_List });
 }
 
@@ -14,6 +16,7 @@ function userScan(req, res) {
 }
 
 function userConnect(req, res) {
+  const WPA_List = readWPAConfig();
   const selectedWifi = req.body.wifi;
   const password = req.body.password;
   turnOffAccessPoint();
@@ -31,7 +34,6 @@ function userConnect(req, res) {
       execSync(
         `sudo wpa_cli -i wlan0 set_network ${networkId} psk '"${password}"'`
       );
-      WPA_List.push(selectedWifi);
     } else {
       execSync(
         `sudo wpa_cli -i wlan0 set_network ${networkId} psk '"${password}"'`
@@ -48,7 +50,10 @@ function userConnect(req, res) {
   setTimeout(() => {
     if (checkInternetConnection()) {
       console.log("Internet is connected.");
-      exec("chromium-browser --kiosk https://192.168.1.5:8000");
+      exec(
+        "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
+      );
+      resumeInternetCheck();
       res.send("Internet is connected");
     } else {
       console.log(
