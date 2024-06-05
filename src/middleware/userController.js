@@ -28,10 +28,8 @@ async function userConnect(req, res) {
   try {
     let networkId = WPA_List.indexOf(selectedWifi);
     if (networkId === -1) {
-      let addNetworkOutput = await exec(
-        "sudo wpa_cli -i wlan0 add_network"
-      ).toString();
-      networkId = addNetworkOutput.stdout.trim();
+      const result = await exec("sudo wpa_cli -i wlan0 add_network");
+      networkId = parseInt(result.stdout.toString());
       await exec(
         `sudo wpa_cli -i wlan0 set_network ${networkId} ssid '"${selectedWifi}"'`
       );
@@ -54,9 +52,9 @@ async function userConnect(req, res) {
   setTimeout(async () => {
     if (await checkInternetConnection()) {
       console.log("Internet is connected.");
-      exec(
-        "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
-      );
+      // exec(
+      //   "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
+      // );
       resumeInternetCheck();
       res.send("Internet is connected");
     } else {

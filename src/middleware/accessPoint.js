@@ -19,10 +19,12 @@ async function turnOnAccessPoint() {
       "sudo nmcli device connect wlan0"
     );
     console.log(stdout.toString());
-  } catch (error) {
-    console.error("Error turning on access point:", error);
-    const err = await exec("sudo systemctl restart NetworkManager");
-    console.log(err.toString());
+  } catch (err) {
+    console.error("Error turning on access point:", err);
+    const { error, stdout, stderr } = await exec(
+      "sudo systemctl restart NetworkManager"
+    );
+    console.log(stdout.toString());
   }
 }
 
@@ -42,7 +44,7 @@ async function turnOffAccessPoint() {
     const { error, stdout, stderr } = await exec(
       "sudo systemctl restart dhcpcd"
     );
-    console.log(stderr.toString());
+    console.log(stdout.toString());
   }
 }
 

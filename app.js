@@ -31,7 +31,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, async () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://${getIpAddress()}:${PORT}`);
   if (await checkInternetConnection()) {
     console.log("Internet is connected.");
     // exec(
