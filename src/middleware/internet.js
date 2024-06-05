@@ -26,12 +26,14 @@ async function getIpAddress() {
 
 async function readWPAConfig() {
   try {
-    const wpaConfig = await exec(
+    const result = await exec(
       "sudo cat /etc/wpa_supplicant/wpa_supplicant.conf"
-    ).toString();
-    const WPA_List = wpaConfig.stdout
+    );
+    const wpaConfig = result.stdout.toString();
+    const WPA_List = wpaConfig
       .match(/ssid="(.*?)"/g)
       .map((ssid) => ssid.replace("ssid=", "").replace(/"/g, ""));
+    console.log(WPA_List);
     return WPA_List;
   } catch (error) {
     console.error("Error reading WPA configuration:", error);
@@ -41,14 +43,23 @@ async function readWPAConfig() {
 
 async function scanForWiFiNetworks() {
   try {
-    let scanOutput = await exec("sudo iwlist wlan0 scan").toString();
-    const WiFi_List = scanOutput
-      .match(/ESSID:"(.*?)"/g)
-      .map((ssid) => ssid.replace("ESSID:", "").replace(/"/g, ""));
-    return WiFi_List;
+    const result = await exec("sudo iwlist wlan0 scan");
+    const output = result.stdout.toString();
+
+    // Find all SSIDs in the output
+    const ssidMatches = output.match(/ESSID:"(.*?)"/g);
+
+    // Check if ssidMatches is not null or undefined before calling map
+    if (ssidMatches) {
+      return ssidMatches.map((ssid) => {
+        return ssid.replace("ESSID:", "").replace(/"/g, "");
+      });
+    } else {
+      console.error("No networks found");
+      return [];
+    }
   } catch (error) {
     console.error("Error scanning for Wi-Fi networks:", error);
-    return [];
   }
 }
 
