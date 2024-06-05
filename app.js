@@ -1,7 +1,5 @@
 const express = require("express");
-const { exec } = require("child_process");
 const {
-  startInternetCheck,
   checkInternetConnection,
   getIpAddress,
 } = require("./src/middleware/internet");
@@ -9,7 +7,6 @@ const { turnOnAccessPoint } = require("./src/middleware/accessPoint");
 const path = require("path");
 const bodyParser = require("body-parser");
 const router = require("./src/route/route");
-const { get } = require("http");
 
 const app = express();
 const PORT = 3000;
@@ -32,17 +29,22 @@ app.use((err, req, res, next) => {
 });
 
 async function main() {
-  const internetConnection = await checkInternetConnection();
-  if (!internetConnection) {
-    await turnOnAccessPoint();
-  }
+  await initDevice();
   const hostname = await getIpAddress();
-  console.log(`Server is running on http://${hostname}:${PORT}`);
-  startInternetCheck();
+  startExpress(hostname, PORT);
 }
 
-await main();
+async function initDevice() {
+  const isInternetConnected = await checkInternetConnection();
+  if (!isInternetConnected) {
+    await turnOnAccessPoint();
+  }
+}
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+function startExpress(hostname, PORT) {
+  app.listen(PORT, hostname, () => {
+    console.log(`Server is running on http://${hostname}:${PORT}`);
+  });
+}
+
+main();

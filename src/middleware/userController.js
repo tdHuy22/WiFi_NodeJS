@@ -5,7 +5,6 @@ const exec = util.promisify(execCallback);
 const {
   checkInternetConnection,
   scanForWiFiNetworks,
-  readWPAConfig,
   resumeInternetCheck,
 } = require("./internet");
 const { turnOnAccessPoint, turnOffAccessPoint } = require("./accessPoint");
@@ -20,27 +19,19 @@ function userScan(req, res) {
 }
 
 async function userConnect(req, res) {
-  const WPA_List = await readWPAConfig();
   const selectedWifi = req.body.wifi;
   const password = req.body.password;
   await turnOffAccessPoint();
 
   try {
-    let networkId = WPA_List.indexOf(selectedWifi);
-    if (networkId === -1) {
-      const result = await exec("sudo wpa_cli -i wlan0 add_network");
-      networkId = parseInt(result.stdout.toString());
-      await exec(
-        `sudo wpa_cli -i wlan0 set_network ${networkId} ssid '"${selectedWifi}"'`
-      );
-      await exec(
-        `sudo wpa_cli -i wlan0 set_network ${networkId} psk '"${password}"'`
-      );
-    } else {
-      await exec(
-        `sudo wpa_cli -i wlan0 set_network ${networkId} psk '"${password}"'`
-      );
-    }
+    const result = await exec("sudo wpa_cli -i wlan0 add_network");
+    const networkId = parseInt(result.stdout.toString());
+    await exec(
+      `sudo wpa_cli -i wlan0 set_network ${networkId} ssid '"${selectedWifi}"'`
+    );
+    await exec(
+      `sudo wpa_cli -i wlan0 set_network ${networkId} psk '"${password}"'`
+    );
     await exec(`sudo wpa_cli -i wlan0 enable_network ${networkId}`);
     await exec("sudo wpa_cli -i wlan0 save_config");
   } catch (error) {
@@ -50,12 +41,14 @@ async function userConnect(req, res) {
   }
 
   setTimeout(async () => {
-    if (await checkInternetConnection()) {
+    const isInternetConnected = await checkInternetConnection();
+    if (isInternetConnected) {
       console.log("Internet is connected.");
       // exec(
       //   "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
       // );
-      resumeInternetCheck();
+      // resumeInternetCheck();
+      console.log("Internet is connected");
       res.send("Internet is connected");
     } else {
       console.log(

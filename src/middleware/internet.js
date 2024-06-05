@@ -24,23 +24,6 @@ async function getIpAddress() {
   }
 }
 
-async function readWPAConfig() {
-  try {
-    const result = await exec(
-      "sudo cat /etc/wpa_supplicant/wpa_supplicant.conf"
-    );
-    const wpaConfig = result.stdout.toString();
-    const WPA_List = wpaConfig
-      .match(/ssid="(.*?)"/g)
-      .map((ssid) => ssid.replace("ssid=", "").replace(/"/g, ""));
-    console.log(WPA_List);
-    return WPA_List;
-  } catch (error) {
-    console.error("Error reading WPA configuration:", error);
-    return [];
-  }
-}
-
 async function scanForWiFiNetworks() {
   try {
     const result = await exec("sudo iwlist wlan0 scan");
@@ -65,15 +48,16 @@ async function scanForWiFiNetworks() {
 
 let checkInterval = null;
 
-function startInternetCheck() {
+async function startInternetCheck() {
   if (checkInterval !== null) return; // If it's already running, do nothing
 
-  checkInterval = setInterval(() => {
-    if (!checkInternetConnection()) {
+  checkInterval = setInterval(async () => {
+    const isInternetConnected = await checkInternetConnection();
+    if (!isInternetConnected) {
       console.log("Internet disconnected. Stopping checks.");
       clearInterval(checkInterval);
       checkInterval = null;
-      turnOnAccessPoint();
+      await turnOnAccessPoint();
     } else {
       console.log("Internet connected. Running checks.");
       // exec(
@@ -83,10 +67,11 @@ function startInternetCheck() {
   }, 60000); // Check every 60 seconds
 }
 
-function resumeInternetCheck() {
-  if (checkInterval === null && checkInternetConnection()) {
+async function resumeInternetCheck() {
+  const isInternetConnected = await checkInternetConnection();
+  if (checkInterval === null && isInternetConnected) {
     console.log("Internet reconnected. Resuming checks.");
-    startInternetCheck();
+    await startInternetCheck();
   }
 }
 
@@ -94,7 +79,6 @@ function resumeInternetCheck() {
 module.exports = {
   checkInternetConnection,
   scanForWiFiNetworks,
-  readWPAConfig,
   getIpAddress,
   startInternetCheck,
   resumeInternetCheck,
