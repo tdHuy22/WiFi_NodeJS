@@ -1,6 +1,8 @@
 const { turnOnAccessPoint } = require("./accessPoint");
+const { exec: execCallback } = require("child_process");
 const util = require("util");
-const { exec } = util.promisify(require("child_process"));
+
+const exec = util.promisify(execCallback);
 
 async function checkInternetConnection() {
   try {
