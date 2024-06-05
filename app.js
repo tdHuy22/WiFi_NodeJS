@@ -9,6 +9,7 @@ const { turnOnAccessPoint } = require("./src/middleware/accessPoint");
 const path = require("path");
 const bodyParser = require("body-parser");
 const router = require("./src/route/route");
+const { get } = require("http");
 
 const app = express();
 const PORT = 3000;
@@ -31,8 +32,11 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, async () => {
-  console.log(`Server is running on http://${getIpAddress()}:${PORT}`);
-  if (await checkInternetConnection()) {
+  const hostname = await getIpAddress();
+  const internetConnection = await checkInternetConnection();
+
+  console.log(`Server is running on http://${hostname}:${PORT}`);
+  if (internetConnection) {
     console.log("Internet is connected.");
     // exec(
     //   "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
