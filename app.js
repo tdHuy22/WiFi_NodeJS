@@ -43,6 +43,6 @@ app.listen(PORT, async () => {
     // );
   } else {
     await turnOnAccessPoint();
-    startInternetCheck();
   }
+  startInternetCheck();
 });

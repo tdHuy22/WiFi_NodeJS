@@ -76,9 +76,9 @@ function startInternetCheck() {
       turnOnAccessPoint();
     } else {
       console.log("Internet connected. Running checks.");
-      exec(
-        "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
-      );
+      // exec(
+      //   "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
+      // );
     }
   }, 60000); // Check every 60 seconds
 }
