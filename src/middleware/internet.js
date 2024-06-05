@@ -1,47 +1,52 @@
-const { turnOnAccessPoint, turnOffAccessPoint } = require("./accessPoint");
-const { exec, execSync } = require("child_process");
+const { turnOnAccessPoint } = require("./accessPoint");
+const util = require("util");
+const { exec } = util.promisify(require("child_process"));
 
-function checkInternetConnection() {
+async function checkInternetConnection() {
   try {
-    execSync("ping -c 1 8.8.8.8");
+    const { stdout } = await exec("ping -c 1 8.8.8.8");
+    console.log(stdout.toString());
     return true;
   } catch (error) {
     return false;
   }
 }
 
-function getIpAddress() {
+async function getIpAddress() {
   try {
-    const ip = execSync("hostname -I").toString().split(" ")[0];
-    return ip;
+    const ip = await exec("hostname -I");
+    const result = ip.stdout.toString().split(" ")[0];
+    return result;
   } catch (error) {
     console.error("Error getting IP address:", error);
   }
 }
 
-function readWPAConfig() {
+async function readWPAConfig() {
   try {
-    const wpaConfig = execSync(
+    const wpaConfig = await exec(
       "sudo cat /etc/wpa_supplicant/wpa_supplicant.conf"
     ).toString();
-    const WPA_List = wpaConfig
+    const WPA_List = wpaConfig.stdout
       .match(/ssid="(.*?)"/g)
       .map((ssid) => ssid.replace("ssid=", "").replace(/"/g, ""));
     return WPA_List;
   } catch (error) {
     console.error("Error reading WPA configuration:", error);
+    return [];
   }
 }
 
-function scanForWiFiNetworks() {
+async function scanForWiFiNetworks() {
   try {
-    let scanOutput = execSync("sudo iwlist wlan0 scan").toString();
+    let scanOutput = await exec("sudo iwlist wlan0 scan").toString();
     const WiFi_List = scanOutput
       .match(/ESSID:"(.*?)"/g)
       .map((ssid) => ssid.replace("ESSID:", "").replace(/"/g, ""));
     return WiFi_List;
   } catch (error) {
     console.error("Error scanning for Wi-Fi networks:", error);
+    return [];
   }
 }
 

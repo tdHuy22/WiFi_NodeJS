@@ -30,15 +30,15 @@ app.use((err, req, res, next) => {
   res.send("Something went wrong!");
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-  if (checkInternetConnection()) {
+  if (await checkInternetConnection()) {
     console.log("Internet is connected.");
     // exec(
     //   "chromium-browser --kiosk --enable-browser-cloud-management https://192.168.1.5:8000/screen"
     // );
   } else {
-    turnOnAccessPoint();
+    await turnOnAccessPoint();
     startInternetCheck();
   }
 });
