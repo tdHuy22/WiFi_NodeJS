@@ -1,7 +1,7 @@
 const { exec: execCallback } = require("child_process");
 const util = require("util");
-
 const exec = util.promisify(execCallback);
+const { delay } = require("./delay").default;
 const {
   checkInternetConnection,
   scanForWiFiNetworks,
@@ -26,13 +26,17 @@ async function userConnect(req, res) {
   try {
     const result = await exec("sudo wpa_cli -i wlan0 add_network");
     const networkId = parseInt(result.stdout.toString());
+    await delay(1000);
     await exec(
       `sudo wpa_cli -i wlan0 set_network ${networkId} ssid '"${selectedWifi}"'`
     );
+    await delay(1000);
     await exec(
       `sudo wpa_cli -i wlan0 set_network ${networkId} psk '"${password}"'`
     );
+    await delay(1000);
     await exec(`sudo wpa_cli -i wlan0 enable_network ${networkId}`);
+    await delay(1000);
     await exec("sudo wpa_cli -i wlan0 save_config");
   } catch (error) {
     console.error("Error connecting to Wi-Fi network:", error);
