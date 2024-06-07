@@ -1,7 +1,7 @@
 const { exec: execCallback } = require("child_process");
 const util = require("util");
 const exec = util.promisify(execCallback);
-const { delay } = require("./delay").default;
+const { delay } = require("./delay");
 const {
   checkInternetConnection,
   scanForWiFiNetworks,
